@@ -1,27 +1,52 @@
-# Django
+# ==========================
+# Python / Django
+# ==========================
 __pycache__/
 *.py[cod]
 *$py.class
-db.sqlite3
-local_settings.py
+*.pyo
+*.pyd
 .env
+*.env
+local_settings.py
+
+# Virtual environment
 backend/venv/
+venv/
+env/
+.venv/
+
+# Django
 backend/db.sqlite3
+db.sqlite3
 backend/media/
 backend/staticfiles/
+backend/static/
 
-# Node
+# ==========================
+# Node / React
+# ==========================
 node_modules/
 frontend/node_modules/
 dist/
 frontend/dist/
 *.log
+npm-debug.log*
 
-# IDEs
+# ==========================
+# IDE & OS
+# ==========================
 .vscode/
 .idea/
 .cursor/
-
-# OS
 .DS_Store
 Thumbs.db
+
+# ==========================
+# Secrets
+# ==========================
+.env
+.env.local
+.env.production
+*.pem
+*.key
