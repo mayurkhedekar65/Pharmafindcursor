@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { userSignup, pharmacySignup } from '../services/apiClient'
 
@@ -16,9 +16,14 @@ function SignupPage() {
   const navigate = useNavigate()
   const { login: setAuth } = useAuth()
 
-  const [accountType, setAccountType] = useState('consumer') // 'consumer' or 'pharmacy'
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const initialType = searchParams.get('type') === 'pharmacy' ? 'pharmacy' : 'consumer'
+
+  const [accountType, setAccountType] = useState(initialType) // 'consumer' or 'pharmacy'
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [email, setEmail] = useState('')
   
   // Pharmacy-specific fields
@@ -33,12 +38,56 @@ function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Geocoding suggestions state
+  const [locSuggestions, setLocSuggestions] = useState([])
+  const [isSearchingLoc, setIsSearchingLoc] = useState(false)
+  const [showLocSuggestions, setShowLocSuggestions] = useState(false)
+
+  // Fetch coordinates based on Area input
+  useEffect(() => {
+    if (accountType !== 'pharmacy' || !area.trim() || area.length < 3) {
+      setLocSuggestions([])
+      return
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingLoc(true)
+      try {
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(area)}&limit=5`)
+        const data = await res.json()
+        setLocSuggestions(data.features || [])
+      } catch (err) {
+        console.error('Loc API error:', err)
+      } finally {
+        setIsSearchingLoc(false)
+      }
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [area, accountType])
+
+  const handleLocSelect = (feat) => {
+    const p = feat.properties
+    const [lon, lat] = feat.geometry.coordinates
+
+    setArea(p.name || '')
+    setCity(p.city || p.district || p.state || '')
+    setLatitude(String(lat))
+    setLongitude(String(lon))
+    setShowLocSuggestions(false)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
-    if (!username.trim() || !password.trim()) {
-      setError('Username and password are required.')
+    if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError('Username, password, and confirmation are required.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
       return
     }
 
@@ -67,6 +116,7 @@ function SignupPage() {
         const data = await pharmacySignup({
           username,
           password,
+          confirmPassword,
           email: emailTrimmed,
           pharmacyName,
           area,
@@ -87,7 +137,7 @@ function SignupPage() {
     } else {
       setLoading(true)
       try {
-        const data = await userSignup({ username, password, email: emailTrimmed })
+        const data = await userSignup({ username, password, confirmPassword, email: emailTrimmed })
         setAuth(data.token, data.user)
         navigate('/')
       } catch (err) {
@@ -148,6 +198,18 @@ function SignupPage() {
           </div>
 
           <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password *</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              autoComplete="new-password"
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="email">Email (optional)</label>
             <input
               id="email"
@@ -173,19 +235,42 @@ function SignupPage() {
               </div>
 
               <div className="form-row">
-                <div className="form-group">
+                <div className="form-group" style={{ position: 'relative' }}>
                   <label htmlFor="area">Area *</label>
                   <input
                     id="area"
                     type="text"
                     value={area}
-                    onChange={(e) => setArea(e.target.value)}
+                    onChange={(e) => {
+                      setArea(e.target.value)
+                      setShowLocSuggestions(true)
+                    }}
                     placeholder="e.g. Panaji"
+                    autoComplete="off"
                   />
+                  {showLocSuggestions && (locSuggestions.length > 0 || isSearchingLoc) && (
+                    <ul className="suggestions-list">
+                      {isSearchingLoc && <li className="suggestion-item loading">Searching...</li>}
+                      {locSuggestions.map((feat, idx) => {
+                        const p = feat.properties
+                        const label = [p.name, p.city, p.state].filter(Boolean).join(', ')
+                        return (
+                          <li
+                            key={idx}
+                            className="suggestion-item"
+                            onMouseDown={() => handleLocSelect(feat)}
+                          >
+                            <span className="suggestion-icon">📍</span>
+                            <span style={{ fontSize: '0.85rem' }}>{label}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="city">City *</label>
+                  <label htmlFor="city">City / State *</label>
                   <input
                     id="city"
                     type="text"
@@ -207,6 +292,9 @@ function SignupPage() {
                     onChange={(e) => setLatitude(e.target.value)}
                     placeholder="e.g. 15.4909"
                   />
+                  <small style={{ color: 'var(--primary-color)', fontSize: '0.7rem' }}>
+                    Auto-filled on Area select
+                  </small>
                 </div>
 
                 <div className="form-group">

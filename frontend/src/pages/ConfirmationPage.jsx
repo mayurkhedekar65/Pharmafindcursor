@@ -111,8 +111,8 @@ function ConfirmationPage() {
           <Link to="/" className="secondary-button">
             New Search
           </Link>
-          <Link to="/cart" className="primary-button">
-            View Cart
+          <Link to="/my-orders" className="primary-button">
+            Track Your Orders
           </Link>
         </div>
       </section>

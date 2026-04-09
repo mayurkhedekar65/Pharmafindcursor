@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     localStorage.removeItem('pharmafind_token')
     localStorage.removeItem('pharmafind_user')
+    localStorage.removeItem('pharmafind_cart')
   }
 
   const value = {

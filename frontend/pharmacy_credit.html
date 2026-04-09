@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Sanctuary | Credit Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#003f1d",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "background": "#f6fafe",
+                        "primary-fixed": "#cfe5ff",
+                        "outline": "#707882",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#171c1f",
+                        "tertiary": "#006d37",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f6fafe",
+                        "surface-container-high": "#e4e9ed",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#00164e",
+                        "tertiary-container": "#31b566",
+                        "on-secondary-container": "#1d3989",
+                        "on-primary-fixed": "#001d34",
+                        "secondary-fixed-dim": "#b6c4ff",
+                        "surface-container-highest": "#dfe3e7",
+                        "tertiary-fixed-dim": "#61de8a",
+                        "primary": "#00629e",
+                        "surface": "#f6fafe",
+                        "surface-dim": "#d6dade",
+                        "on-tertiary-fixed": "#00210c",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2c3134",
+                        "secondary-fixed": "#dce1ff",
+                        "secondary-container": "#8fa7fe",
+                        "primary-container": "#49a5f2",
+                        "outline-variant": "#bfc7d3",
+                        "surface-variant": "#dfe3e7",
+                        "tertiary-fixed": "#7efba4",
+                        "on-surface-variant": "#404751",
+                        "on-background": "#171c1f",
+                        "on-primary-fixed-variant": "#004a78",
+                        "secondary": "#4059aa",
+                        "inverse-on-surface": "#edf1f5",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#99cbff",
+                        "on-primary-container": "#00395e",
+                        "surface-container-low": "#f0f4f8",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#00629e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#eaeef2",
+                        "primary-fixed-dim": "#99cbff",
+                        "on-secondary-fixed-variant": "#264191"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .headline { font-family: 'Manrope', sans-serif; }
+        .tonal-shift-no-borders { background-color: #f0f4f8; }
+        .tonal-layering-depth-transition { transition: all 0.3s ease; }
+        .glass-panel { backdrop-filter: blur(40px); background: rgba(246, 250, 254, 0.7); }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r-0 bg-[#f0f4f8] flex flex-col py-8 px-4 font-['Manrope'] font-bold tracking-tight z-40">
+<div class="mb-12 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+</div>
+<div>
+<div class="text-2xl font-black text-[#171c1f]">Clinical Sanctuary</div>
+<div class="text-[10px] uppercase tracking-widest text-[#49a5f2]">B2B Pharma Suite</div>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">point_of_sale</span>
+                POS
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">inventory_2</span>
+                Stock
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">shopping_cart</span>
+                Orders
+            </div>
+<!-- ACTIVE: Credit -->
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#49a5f2] font-bold border-r-4 border-[#49a5f2] bg-[#e4e9ed] cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">credit_card</span>
+                Credit
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">lock</span>
+                Vault
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">sync</span>
+                Sync
+            </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#e4e9ed] transition-colors duration-200 text-[#171c1f]/60 font-medium cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+                Profile
+            </div>
+</nav>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-30 flex justify-between items-center px-12 h-20 bg-[#f6fafe]/70 backdrop-blur-xl shadow-[0px_40px_60px_-15px_rgba(23,28,31,0.05)]">
+<div class="flex-1 max-w-md">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2.5 pl-12 pr-4 text-sm font-['Inter'] focus:ring-2 focus:ring-[#49a5f2]/30 transition-all" placeholder="Search customer records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined cursor-pointer hover:text-[#49a5f2] transition-all">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-[#49a5f2] transition-all">help_outline</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-[#49a5f2] transition-all">settings</span>
+</div>
+<div class="flex items-center gap-3 ml-4">
+<div class="text-right">
+<div class="text-sm font-bold font-['Inter']">Dr. Julian Vance</div>
+<div class="text-[10px] text-on-surface-variant">Senior Pharmacist</div>
+</div>
+<img alt="Pharmacist Profile" class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="portrait of a professional male doctor in a white coat with a friendly expression in a modern clinic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWQwgvWeKHdeNib9FeqN6XhEQalRxfhjqL4wsbDjMMy17aXRW_x1Tk7BcpMntp0bmgEHAVY1dHZHCPh96HUvRk9MK2iqfCJgIkQFNF1fVQa7f1u0-Hj0e_T4JEmqgmpRSiqiSaoSMrxAOb7I1dYKAuOtYOj_3nOLyeMv7ivjfrXdHZkkDMWThzQxD3OAIKxWkbK3SAMzJlWo25IGaqEi3ovqcd0oThDMcCqNfbm1JOnd47wOJn6BDArmmPNDnH0GtTqxLJxKvVly7T"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-28 px-12 pb-12 min-h-screen relative">
+<!-- Header Section -->
+<div class="mb-10 flex justify-between items-end">
+<div class="max-w-2xl">
+<h1 class="text-4xl font-extrabold tracking-tight mb-2">Credit Ledger</h1>
+<p class="text-on-surface-variant font-['Inter']">Manage outstanding balances and collection cycles for pharmaceutical accounts.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-high text-on-surface px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-95 transition-transform">
+<span class="material-symbols-outlined">download</span>
+                    Export PDF
+                </button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-3 rounded-full font-bold shadow-lg shadow-primary/20 hover:scale-95 transition-transform">
+                    Add New Account
+                </button>
+</div>
+</div>
+<!-- Dashboard Stat Cards (Bento Style) -->
+<div class="grid grid-cols-12 gap-6 mb-10">
+<div class="col-span-4 bg-surface-container-low p-8 rounded-xl relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl">account_balance_wallet</span>
+</div>
+<div class="text-on-surface-variant font-medium mb-1">Total Receivables</div>
+<div class="text-3xl font-black text-primary">$42,904.50</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-tertiary font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                    +12% from last month
+                </div>
+</div>
+<div class="col-span-4 bg-surface-container-low p-8 rounded-xl relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl">warning</span>
+</div>
+<div class="text-on-surface-variant font-medium mb-1">Overdue 30+ Days</div>
+<div class="text-3xl font-black text-error">$8,120.00</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-error font-bold">
+<span class="material-symbols-outlined text-sm">priority_high</span>
+                    4 accounts require attention
+                </div>
+</div>
+<div class="col-span-4 bg-surface-container-low p-8 rounded-xl relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-9xl">fact_check</span>
+</div>
+<div class="text-on-surface-variant font-medium mb-1">Settled This Week</div>
+<div class="text-3xl font-black text-tertiary">$12,450.00</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+                    18 transactions processed
+                </div>
+</div>
+</div>
+<!-- Ledger Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_40px_80px_-20px_rgba(23,28,31,0.08)] overflow-hidden">
+<div class="p-8 border-b border-surface-container-highest flex justify-between items-center bg-surface-container-lowest">
+<h2 class="text-xl font-bold">Active Credits</h2>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-secondary-container/20 text-on-secondary-container rounded-lg text-xs font-bold uppercase tracking-wider">All Accounts</button>
+<button class="px-4 py-2 text-on-surface-variant rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-surface-container-low transition-colors">Overdue Only</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-5 font-bold text-on-surface-variant text-sm uppercase tracking-widest">Customer Name</th>
+<th class="px-8 py-5 font-bold text-on-surface-variant text-sm uppercase tracking-widest">Phone</th>
+<th class="px-8 py-5 font-bold text-on-surface-variant text-sm uppercase tracking-widest">Last Activity</th>
+<th class="px-8 py-5 font-bold text-on-surface-variant text-sm uppercase tracking-widest">Balance</th>
+<th class="px-8 py-5 font-bold text-on-surface-variant text-sm uppercase tracking-widest">Status</th>
+<th class="px-8 py-5"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed-dim text-on-secondary-fixed-variant flex items-center justify-center font-bold">AL</div>
+<div>
+<div class="font-bold">Apex Life Sciences</div>
+<div class="text-xs text-on-surface-variant">ID: CS-9021</div>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-medium text-on-surface-variant">+1 (555) 012-3456</td>
+<td class="px-8 py-6 text-on-surface-variant">Oct 12, 2023</td>
+<td class="px-8 py-6">
+<div class="font-black text-lg">$4,250.00</div>
+</td>
+<td class="px-8 py-6">
+<span class="bg-tertiary-container/20 text-on-tertiary-container px-3 py-1 rounded-full text-xs font-bold">Good Standing</span>
+</td>
+<td class="px-8 py-6 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Settle Credit</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold">RM</div>
+<div>
+<div class="font-bold">Riverside Medicare</div>
+<div class="text-xs text-on-surface-variant">ID: CS-8842</div>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-medium text-on-surface-variant">+1 (555) 987-6543</td>
+<td class="px-8 py-6 text-on-surface-variant">Sep 28, 2023</td>
+<td class="px-8 py-6">
+<div class="font-black text-lg text-error">$1,120.00</div>
+<div class="text-[10px] font-bold text-error uppercase">Overdue 14 Days</div>
+</td>
+<td class="px-8 py-6">
+<span class="bg-error-container/40 text-on-error-container px-3 py-1 rounded-full text-xs font-bold">Warning</span>
+</td>
+<td class="px-8 py-6 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Settle Credit</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-bold">NP</div>
+<div>
+<div class="font-bold">NextGen Pharma</div>
+<div class="text-xs text-on-surface-variant">ID: CS-7421</div>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-medium text-on-surface-variant">+1 (555) 234-5678</td>
+<td class="px-8 py-6 text-on-surface-variant">Oct 14, 2023</td>
+<td class="px-8 py-6">
+<div class="font-black text-lg">$12,800.50</div>
+</td>
+<td class="px-8 py-6">
+<span class="bg-tertiary-container/20 text-on-tertiary-container px-3 py-1 rounded-full text-xs font-bold">Good Standing</span>
+</td>
+<td class="px-8 py-6 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Settle Credit</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold">SH</div>
+<div>
+<div class="font-bold">St. Helena Clinic</div>
+<div class="text-xs text-on-surface-variant">ID: CS-3329</div>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 font-medium text-on-surface-variant">+1 (555) 443-1122</td>
+<td class="px-8 py-6 text-on-surface-variant">Oct 05, 2023</td>
+<td class="px-8 py-6">
+<div class="font-black text-lg">$2,440.00</div>
+</td>
+<td class="px-8 py-6">
+<span class="bg-tertiary-container/20 text-on-tertiary-container px-3 py-1 rounded-full text-xs font-bold">Good Standing</span>
+</td>
+<td class="px-8 py-6 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Settle Credit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-8 bg-surface-container-low/30 flex justify-between items-center">
+<div class="text-sm text-on-surface-variant">Showing 4 of 124 accounts</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center bg-primary text-white font-bold">1</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant hover:bg-surface-container-high transition-colors font-bold">2</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Settle Credit Modal (Overlay) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+<div class="absolute inset-0 bg-on-surface/40 backdrop-blur-md"></div>
+<div class="relative w-full max-w-xl bg-surface-container-lowest rounded-xl shadow-2xl overflow-hidden">
+<!-- Modal Header -->
+<div class="p-8 bg-gradient-to-br from-primary to-primary-container text-on-primary">
+<div class="flex justify-between items-start mb-6">
+<div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<button class="text-white/60 hover:text-white transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<h3 class="text-2xl font-black mb-1">Settle Account Credit</h3>
+<p class="text-white/80 font-['Inter'] text-sm">Processing settlement for <span class="font-bold">Riverside Medicare (ID: CS-8842)</span></p>
+</div>
+<!-- Modal Body -->
+<div class="p-8 space-y-8">
+<!-- Debt Summary -->
+<div class="bg-surface-container-low p-6 rounded-xl flex justify-between items-center">
+<div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-1">Outstanding Balance</div>
+<div class="text-3xl font-black text-error">$1,120.00</div>
+</div>
+<div class="text-right">
+<div class="text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-1">Last Invoice</div>
+<div class="text-sm font-bold">INV-902114</div>
+</div>
+</div>
+<!-- Input Fields -->
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Amount</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">$</span>
+<input class="w-full pl-8 pr-4 py-4 bg-surface-container-low border-none rounded-xl font-black text-xl focus:ring-2 focus:ring-primary/30 transition-all" type="number" value="1120.00"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Payment Method</label>
+<select class="w-full p-4 bg-surface-container-low border-none rounded-xl font-semibold text-sm focus:ring-2 focus:ring-primary/30 transition-all">
+<option>Bank Transfer</option>
+<option>Credit Card</option>
+<option>Cash</option>
+<option>Cheque</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Transaction ID</label>
+<input class="w-full p-4 bg-surface-container-low border-none rounded-xl font-semibold text-sm focus:ring-2 focus:ring-primary/30 transition-all" placeholder="REF-882291" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Internal Notes</label>
+<textarea class="w-full p-4 bg-surface-container-low border-none rounded-xl font-semibold text-sm focus:ring-2 focus:ring-primary/30 transition-all" placeholder="Add optional settlement details..." rows="2"></textarea>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex gap-4 pt-4">
+<button class="flex-1 py-4 bg-surface-container-highest text-on-surface font-bold rounded-xl hover:bg-surface-dim transition-colors">
+                            Cancel
+                        </button>
+<button class="flex-[2] py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-black rounded-xl shadow-lg shadow-primary/20 hover:scale-95 transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">verified</span>
+                            Confirm Settlement
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Feedback Icon (Optional UX) -->
+<div class="fixed bottom-8 right-8 z-20">
+<button class="w-16 h-16 rounded-full bg-on-surface text-white shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</button>
+</div>
+</body></html>

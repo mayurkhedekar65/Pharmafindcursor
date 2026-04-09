@@ -976,7 +976,7 @@
     "model": "pharmacies.pharmacy",
     "pk": 2,
     "fields": {
-      "name": "Wellness Forever Panaji",
+      "name": "Grand Healthcare Pharmacy Panaji",
       "area": "Panaji",
       "city": "Panaji",
       "latitude": 15.486471,
@@ -1080,7 +1080,7 @@
     "model": "pharmacies.pharmacy",
     "pk": 10,
     "fields": {
-      "name": "Apollo Pharmacy Margao",
+      "name": "City Central Pharmacy Margao",
       "area": "Margao",
       "city": "Margao",
       "latitude": 15.266904,

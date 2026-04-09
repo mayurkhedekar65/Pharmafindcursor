@@ -10,7 +10,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('pharmafind_token')
     if (token) {
-      config.headers.Authorization = `Token ${token}`
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -106,10 +106,11 @@ export async function createReservationFromNames({
 }
 
 // Auth APIs
-export async function userSignup({ username, password, email }) {
+export async function userSignup({ username, password, confirmPassword, email }) {
   const response = await api.post('auth/user/signup/', {
     username,
     password,
+    confirm_password: confirmPassword,
     email: email || '',
   })
   return response.data
@@ -118,6 +119,7 @@ export async function userSignup({ username, password, email }) {
 export async function pharmacySignup({
   username,
   password,
+  confirmPassword,
   email,
   pharmacyName,
   area,
@@ -130,6 +132,7 @@ export async function pharmacySignup({
   const response = await api.post('auth/pharmacy/signup/', {
     username,
     password,
+    confirm_password: confirmPassword,
     email: email || '',
     pharmacy_name: pharmacyName,
     area,
@@ -193,3 +196,21 @@ export async function toggleDelivery(pharmacyId, deliveryAvailable) {
   })
   return response.data
 }
+
+export async function getUserOrders() {
+  const response = await api.get('user-orders/')
+  return response.data
+}
+
+export async function getPharmacyOrders(pharmacyId) {
+  const response = await api.get(`pharmacy/${pharmacyId}/orders/`)
+  return response.data
+}
+
+export async function updateReservationStatus(reservationId, status) {
+  const response = await api.put(`reservations/${reservationId}/status/`, {
+    status,
+  })
+  return response.data
+}
+

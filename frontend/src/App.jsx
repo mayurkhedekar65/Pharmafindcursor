@@ -12,6 +12,8 @@ import UserProfilePage from './pages/UserProfilePage.jsx'
 import PharmacyDashboardPage from './pages/PharmacyDashboardPage.jsx'
 import PharmacyProfilePage from './pages/PharmacyProfilePage.jsx'
 import PharmacyStockPage from './pages/PharmacyStockPage.jsx'
+import UserOrdersPage from './pages/UserOrdersPage.jsx'
+import OrdersManagement from './pages/pharmacy/OrdersManagement.jsx'
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
             <Route path="/pharmacy/dashboard" element={<PharmacyDashboardPage />} />
             <Route path="/pharmacy/profile" element={<PharmacyProfilePage />} />
             <Route path="/pharmacy/stock" element={<PharmacyStockPage />} />
+            <Route path="/pharmacy/orders" element={<OrdersManagement />} />
+            <Route path="/my-orders" element={<UserOrdersPage />} />
           </Routes>
         </main>
         <Footer />

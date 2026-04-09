@@ -1,28 +1,25 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Medicine, Pharmacy, Reservation, Stock, UserProfile
+from .models import (
+    Medicine, Pharmacy, Reservation, Stock, UserProfile, 
+    PharmacyIntegration, CreditCustomer, Prescription, MedicineAlternative
+)
 
 
 class PharmacySerializer(serializers.ModelSerializer):
     class Meta:
         model = Pharmacy
         fields = [
-            "id",
-            "name",
-            "area",
-            "city",
-            "latitude",
-            "longitude",
-            "delivery_available",
-            "contact",
+            "id", "name", "area", "city", "latitude", "longitude", 
+            "delivery_available", "contact",
         ]
 
 
 class MedicineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Medicine
-        fields = ["id", "name", "description"]
+        fields = ["id", "name", "description", "category", "price"]
 
 
 class StockSerializer(serializers.ModelSerializer):
@@ -31,22 +28,46 @@ class StockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = ["id", "pharmacy", "medicine", "quantity"]
+        fields = [
+            "id", "pharmacy", "medicine", "quantity", "batch_number", 
+            "expiry_date", "low_stock_threshold", "selling_price", 
+            "cost_price", "last_sold_date", "added_date"
+        ]
 
 
 class ReservationSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.CharField(source="medicine.name", read_only=True)
+    pharmacy_name = serializers.CharField(source="pharmacy.name", read_only=True)
+    customer_name = serializers.CharField(source="user.username", read_only=True)
+    
     class Meta:
         model = Reservation
         fields = [
-            "id",
-            "pharmacy",
-            "medicine",
-            "quantity",
-            "mode",
-            "timestamp",
-            "user_identifier",
+            "id", "user", "customer_name", "pharmacy", "pharmacy_name", 
+            "medicine", "medicine_name", "quantity", "mode", "status", 
+            "total_amount", "timestamp", "user_identifier",
         ]
         read_only_fields = ["id", "timestamp"]
+
+
+class CreditCustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreditCustomer
+        fields = ["id", "pharmacy", "name", "phone", "total_due", "last_payment_date", "notes"]
+
+
+class PrescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prescription
+        fields = ["id", "pharmacy", "patient_name", "patient_phone", "image", "extracted_text", "uploaded_at"]
+        read_only_fields = ["uploaded_at"]
+
+
+class PharmacyIntegrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PharmacyIntegration
+        fields = ["id", "system_type", "api_key", "api_url", "is_active", "last_sync"]
+        read_only_fields = ["last_sync"]
 
 
 class MedicineSearchInputSerializer(serializers.Serializer):
@@ -62,6 +83,8 @@ class MedicineSearchResultSerializer(serializers.Serializer):
     medicine_name = serializers.CharField()
     quantity = serializers.IntegerField()
     delivery_available = serializers.BooleanField()
+    category = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
 
 
 class PharmacyUpdateSerializer(serializers.ModelSerializer):
@@ -83,7 +106,10 @@ class StockCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer for creating or updating stock."""
     class Meta:
         model = Stock
-        fields = ["pharmacy", "medicine", "quantity"]
+        fields = [
+            "pharmacy", "medicine", "quantity", "batch_number", 
+            "expiry_date", "low_stock_threshold", "selling_price", "cost_price"
+        ]
 
 
 class StockListSerializer(serializers.ModelSerializer):
@@ -93,7 +119,10 @@ class StockListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Stock
-        fields = ["id", "medicine", "pharmacy_name", "quantity"]
+        fields = [
+            "id", "medicine", "pharmacy_name", "quantity", "batch_number", 
+            "expiry_date", "low_stock_threshold", "selling_price", "cost_price"
+        ]
 
 
 class UserSignupSerializer(serializers.Serializer):
@@ -101,6 +130,7 @@ class UserSignupSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
     email = serializers.EmailField(required=False, allow_blank=True)
 
     def validate_username(self, value: str) -> str:
@@ -108,12 +138,18 @@ class UserSignupSerializer(serializers.Serializer):
             raise serializers.ValidationError("Username is already taken.")
         return value
 
+    def validate(self, data):
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return data
+
 
 class PharmacySignupSerializer(serializers.Serializer):
     """Signup for a pharmacy account (creates user + pharmacy)."""
 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
     email = serializers.EmailField(required=False, allow_blank=True)
 
     pharmacy_name = serializers.CharField()
@@ -128,6 +164,11 @@ class PharmacySignupSerializer(serializers.Serializer):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username is already taken.")
         return value
+
+    def validate(self, data):
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return data
 
 
 class LoginSerializer(serializers.Serializer):

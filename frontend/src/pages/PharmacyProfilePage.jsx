@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { getPharmacyProfile, updatePharmacyProfile } from '../services/apiClient'
 import ProtectedRoute from '../components/ProtectedRoute'
+import PharmacyLayout from '../layout/PharmacyLayout'
 
 function PharmacyProfilePage() {
   const { user } = useAuth()
@@ -28,7 +29,10 @@ function PharmacyProfilePage() {
   }, [user?.pharmacy_id])
 
   const loadProfile = async () => {
-    if (!user?.pharmacy_id) return
+    if (!user?.pharmacy_id) {
+      setLoading(false)
+      return
+    }
 
     setLoading(true)
     setError('')
@@ -45,7 +49,7 @@ function PharmacyProfilePage() {
       })
     } catch (err) {
       console.error(err)
-      setError('Failed to load pharmacy profile.')
+      setError('Failed to load pharmacy profile. Please relogin.')
     } finally {
       setLoading(false)
     }
@@ -103,69 +107,75 @@ function PharmacyProfilePage() {
   if (loading) {
     return (
       <ProtectedRoute requirePharmacy>
-        <div className="page-container">
-          <section className="card">
-            <p>Loading...</p>
-          </section>
-        </div>
+        <PharmacyLayout title="Pharmacy Profile" subtitle="Loading profile data...">
+          <div className="card pf-p-3 pf-center">
+            <span className="loading-spinner"></span>
+            <p className="pf-mt-sm">Loading data...</p>
+          </div>
+        </PharmacyLayout>
       </ProtectedRoute>
     )
   }
 
   return (
     <ProtectedRoute requirePharmacy>
-      <div className="page-container">
-        <section className="card">
-          <h2>Pharmacy Profile</h2>
-          <p className="card-description">Update your pharmacy information</p>
-
+      <PharmacyLayout 
+        title="Pharmacy Profile" 
+        subtitle="Manage your business details and location."
+      >
+        <div className="card pf-p-2">
+          <h2 className="pf-h2 pf-mb-md">Profile Settings</h2>
+          
           {error && <p className="error-text">{error}</p>}
           {success && <p className="success-text">{success}</p>}
 
           <form className="form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="name">Pharmacy Name *</label>
+            <div className="pf-mb-md">
+              <label className="pf-label">Pharmacy Name *</label>
               <input
-                id="name"
+                className="pf-input"
                 name="name"
                 type="text"
                 value={formData.name}
                 onChange={handleInputChange}
+                placeholder="Official pharmacy name"
                 required
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="area">Area *</label>
+            <div className="pf-row pf-gap-md pf-mb-md">
+              <div className="pf-flex-1">
+                <label className="pf-label">Area *</label>
                 <input
-                  id="area"
+                  className="pf-input"
                   name="area"
                   type="text"
                   value={formData.area}
                   onChange={handleInputChange}
+                  placeholder="Street or neighborhood"
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="city">City *</label>
+              <div className="pf-flex-1">
+                <label className="pf-label">City / State *</label>
                 <input
-                  id="city"
+                  className="pf-input"
                   name="city"
                   type="text"
                   value={formData.city}
                   onChange={handleInputChange}
+                  placeholder="City and State"
                   required
                 />
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="latitude">Latitude *</label>
+            <div className="pf-row pf-gap-md pf-mb-md">
+              <div className="pf-flex-1">
+                <label className="pf-label">Latitude *</label>
                 <input
-                  id="latitude"
+                  className="pf-input"
                   name="latitude"
                   type="number"
                   step="any"
@@ -175,10 +185,10 @@ function PharmacyProfilePage() {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="longitude">Longitude *</label>
+              <div className="pf-flex-1">
+                <label className="pf-label">Longitude *</label>
                 <input
-                  id="longitude"
+                  className="pf-input"
                   name="longitude"
                   type="number"
                   step="any"
@@ -189,37 +199,40 @@ function PharmacyProfilePage() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="contact">Contact Number</label>
+            <div className="pf-mb-md">
+              <label className="pf-label">Contact Number</label>
               <input
-                id="contact"
+                className="pf-input"
                 name="contact"
                 type="text"
                 value={formData.contact}
                 onChange={handleInputChange}
+                placeholder="+91 XXXXX XXXXX"
               />
             </div>
 
-            <div className="form-group checkbox-group">
-              <label>
+            <div className="pf-mb-lg" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
                 <input
                   type="checkbox"
                   name="delivery_available"
+                  id="delivery_available"
                   checked={formData.delivery_available}
                   onChange={handleInputChange}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
                 />
-                Delivery service available
-              </label>
+                <label htmlFor="delivery_available" style={{ fontSize: '0.9rem', fontWeight: '700', color: '#475569', cursor: 'pointer' }}>
+                  Enable Home Delivery Service
+                </label>
             </div>
 
             <div className="form-actions">
-              <button type="submit" className="primary-button" disabled={saving}>
+              <button type="submit" className="primary-button pf-w-100" disabled={saving}>
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
-        </section>
-      </div>
+        </div>
+      </PharmacyLayout>
     </ProtectedRoute>
   )
 }

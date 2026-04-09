@@ -9,7 +9,7 @@ from typing import Iterable, List, Optional, Tuple
 from .models import Pharmacy
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "PharmaFind/1.0 (college mini-project; location search)"
+USER_AGENT = "PharmaFind/1.0 (Location search engine)"
 _NOMINATIM_CACHE: dict[str, Tuple[float, float, str]] = {}
 _NOMINATIM_CACHE_MAX = 100
 
@@ -294,8 +294,7 @@ def haversine_distance_km(
     lat1: float, lon1: float, lat2: float, lon2: float
 ) -> float:
     """
-    Simple approximate distance between two latitude/longitude pairs in kilometres.
-    Precision is not critical for this educational project.
+    Calculate distance between two latitude/longitude pairs in kilometres.
     """
     from math import asin, cos, radians, sin, sqrt
 

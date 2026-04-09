@@ -1,11 +1,14 @@
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useCart } from '../contexts/CartContext'
+import { useAuth } from '../contexts/AuthContext'
 
 function ResultsPage() {
   const location = useLocation()
   const state = location.state
   const { addToCart } = useCart()
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
 
   const [error, setError] = useState('')
   const [loadingReservationId, setLoadingReservationId] = useState(null)
@@ -56,6 +59,12 @@ function ResultsPage() {
   const handleAddToCart = (pharmacy, mode) => {
     setError('')
     setSuccessMessage('')
+    if (!isAuthenticated) {
+      setError('Please login to add items to your cart.')
+      setTimeout(() => navigate('/login'), 2000)
+      return
+    }
+
     setLoadingReservationId(`${pharmacy.pharmacy_name}-${mode}`)
 
     // Simulate a brief loading state for better UX

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getPharmacyStock } from '../services/apiClient'
 import ProtectedRoute from '../components/ProtectedRoute'
+import PharmacyLayout from '../layout/PharmacyLayout'
 
 function PharmacyDashboardPage() {
   const { user } = useAuth()
@@ -18,7 +19,10 @@ function PharmacyDashboardPage() {
   }, [user?.pharmacy_id])
 
   const loadStock = async () => {
-    if (!user?.pharmacy_id) return
+    if (!user?.pharmacy_id) {
+      setLoading(false)
+      return
+    }
 
     setLoading(true)
     setError('')
@@ -35,55 +39,70 @@ function PharmacyDashboardPage() {
 
   return (
     <ProtectedRoute requirePharmacy>
-      <div className="page-container">
-        <section className="card">
-          <h2>Pharmacy Dashboard</h2>
-          <p className="card-description">Manage your pharmacy operations</p>
-
+      <PharmacyLayout 
+        title="Pharmacy Dashboard" 
+        subtitle={`Welcome back, ${user?.pharmacy_name || user?.username}. Here's what's happening today.`}
+      >
           {error && <p className="error-text">{error}</p>}
 
-          <div className="dashboard-stats">
-            <div className="stat-card">
-              <h3>Total Medicines</h3>
-              <p className="stat-number">{loading ? '...' : stock.length}</p>
+          <div className="dashboard-grid pf-mb-2">
+            <div className="stat-card" style={{ background: '#fff', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <p style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase' }}>Products</p>
+              <h3 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#1e293b' }}>{loading ? '...' : stock.length}</h3>
             </div>
-            <div className="stat-card">
-              <h3>Total Stock</h3>
-              <p className="stat-number">
+            <div className="stat-card" style={{ background: 'var(--pharmacy-primary)', color: '#fff', padding: '2rem', borderRadius: '24px' }}>
+              <p style={{ fontSize: '0.75rem', fontWeight: '800', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)' }}>Total Quantity</p>
+              <h3 style={{ fontSize: '2.5rem', fontWeight: '900' }}>
                 {loading
                   ? '...'
                   : stock.reduce((sum, item) => sum + (item.quantity || 0), 0)}
-              </p>
+              </h3>
             </div>
           </div>
 
-          <div className="dashboard-actions">
-            <Link to="/pharmacy/profile" className="primary-button">
+          <div className="pf-row pf-gap-md pf-mb-lg">
+            <Link to="/pharmacy/profile" className="primary-button pf-flex-1">
               Manage Profile
             </Link>
-            <Link to="/pharmacy/stock" className="primary-button">
-              Manage Stock
+            <Link to="/pharmacy/stock" className="primary-button pf-flex-1" style={{ background: '#1e293b' }}>
+              Manage Inventory
             </Link>
           </div>
 
-          <div className="recent-stock">
-            <h3>Recent Stock Items</h3>
+          <div className="recent-stock card pf-p-2">
+            <h3 className="pf-h3">Quick Updates</h3>
             {loading ? (
-              <p>Loading...</p>
+              <p>Loading inventory...</p>
             ) : stock.length === 0 ? (
-              <p className="info-text">No stock items yet. Add medicines to get started.</p>
+              <p className="pf-text-secondary">No products yet. Add medicines to get started.</p>
             ) : (
-              <ul className="stock-preview-list">
-                {stock.slice(0, 5).map((item) => (
-                  <li key={item.id}>
-                    {item.medicine?.name} - Quantity: {item.quantity}
-                  </li>
-                ))}
-              </ul>
+              <div className="pf-table-container">
+                <table className="pf-table">
+                  <thead>
+                    <tr>
+                      <th>Medicine Name</th>
+                      <th>Quantity</th>
+                      <th>Category</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stock.slice(0, 5).map((item) => (
+                      <tr key={item.id}>
+                        <td className="pf-weight-800">{item.medicine?.name}</td>
+                        <td>
+                          <span className={item.quantity < 10 ? 'pf-text-danger pf-weight-900' : ''}>
+                             {item.quantity} units
+                          </span>
+                        </td>
+                        <td>{item.medicine?.category}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-        </section>
-      </div>
+      </PharmacyLayout>
     </ProtectedRoute>
   )
 }

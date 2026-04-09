@@ -1,17 +1,74 @@
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { useState } from 'react'
+import axios from 'axios'
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
 import { createReservationFromNames } from '../services/apiClient'
+import StripeProvider from '../components/StripeProvider'
+import CheckoutForm from '../components/CheckoutForm'
 
 function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart()
-  const { user } = useAuth()
+  const { user, isPharmacy } = useAuth()
   const navigate = useNavigate()
+
+  if (isPharmacy) {
+    return <Navigate to="/pharmacy/dashboard" replace />
+  }
+  
+  if (!user) {
+    return <Navigate to="/" replace />
+  }
+
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentData, setPaymentData] = useState({ clientSecret: '', publishableKey: '' })
+
+  // Mock calculation of total amount (Assuming ₹500 per medicine for simplicity)
+  // In a real app, this should be calculated on the backend based on actual prices
+  const calculateTotal = () => {
+    return cartItems.reduce((sum, item) => sum + (item.quantity * 500), 0)
+  }
+
+  const handleStartPayment = async () => {
+    if (cartItems.length === 0) {
+      setError('Your cart is empty')
+      return
+    }
+
+    setIsProcessing(true)
+    setError('')
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/payments/create-payment-intent/', {
+        amount: calculateTotal()
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('pharmafind_token')}`
+        }
+      })
+      
+      setPaymentData({
+        clientSecret: response.data.clientSecret,
+        publishableKey: response.data.publishableKey
+      })
+      setShowPayment(true)
+    } catch (err) {
+      console.error(err)
+      setError('Could not initialize payment. Please try again.')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   const handleCheckout = async () => {
+    if (!user) {
+      setError('Please login to complete your reservation.')
+      setTimeout(() => navigate('/login'), 2000)
+      return
+    }
+
     if (cartItems.length === 0) {
       setError('Your cart is empty')
       return
@@ -155,36 +212,64 @@ function CartPage() {
           ))}
         </ul>
 
-        <div className="cart-summary">
-          <div className="cart-summary-row">
-            <span>Total Items:</span>
-            <strong>{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</strong>
+        {showPayment ? (
+          <div className="pf-payment-section pf-mt-xl">
+            <div className="pf-payment-header">
+              <div className="pf-row pf-justify-between pf-align-center">
+                <h3>Secure Payment</h3>
+                <button 
+                  className="pf-close-btn" 
+                  onClick={() => setShowPayment(false)}
+                >
+                  &times;
+                </button>
+              </div>
+              <p className="card-description">Pay ₹{calculateTotal()} to complete your reservations.</p>
+            </div>
+            
+            <StripeProvider publishableKey={paymentData.publishableKey}>
+              <CheckoutForm 
+                clientSecret={paymentData.clientSecret}
+                totalAmount={calculateTotal()}
+                onPaymentSuccess={handleCheckout}
+                onPaymentError={(err) => setError(err)}
+              />
+            </StripeProvider>
           </div>
-          <div className="cart-summary-row">
-            <span>Total Reservations:</span>
-            <strong>{cartItems.length}</strong>
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="cart-summary">
+              <div className="cart-summary-row">
+                <span>Total Items:</span>
+                <strong>{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</strong>
+              </div>
+              <div className="cart-summary-total">
+                <span>Total Payable:</span>
+                <strong className="pf-total-price">₹{calculateTotal()}</strong>
+              </div>
+            </div>
 
-        <div className="actions-row pf-mt-lg">
-          <Link to="/" className="secondary-button">
-            Continue Shopping
-          </Link>
-          <button
-            className="primary-button"
-            onClick={handleCheckout}
-            disabled={isProcessing || cartItems.length === 0}
-          >
-            {isProcessing ? (
-              <>
-                <span className="loading-spinner"></span>
-                Processing...
-              </>
-            ) : (
-              'Confirm Reservations'
-            )}
-          </button>
-        </div>
+            <div className="actions-row pf-mt-lg">
+              <Link to="/" className="secondary-button" style={{ textDecoration: 'none' }}>
+                Continue Shopping
+              </Link>
+              <button
+                className="primary-button"
+                onClick={handleStartPayment}
+                disabled={isProcessing || cartItems.length === 0}
+              >
+                {isProcessing ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    Initializing...
+                  </>
+                ) : (
+                  'Confirm Reservations'
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </section>
     </div>
   )

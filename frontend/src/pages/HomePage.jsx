@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { fetchMedicines, fetchPharmacies, searchMedicine } from '../services/apiClient.js'
+import { useAuth } from '../contexts/AuthContext'
 
 function HomePage() {
+  const { isPharmacy } = useAuth()
   const navigate = useNavigate()
   const searchCardRef = useRef(null)
+
+  if (isPharmacy) {
+    return <Navigate to="/pharmacy/dashboard" replace />
+  }
 
   const [pharmacies, setPharmacies] = useState([])
   const [medicines, setMedicines] = useState([])
@@ -16,6 +22,8 @@ function HomePage() {
   const [loadingSearch, setLoadingSearch] = useState(false)
 
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [osmSuggestions, setOsmSuggestions] = useState([])
+  const [isSearchingOsm, setIsSearchingOsm] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -65,13 +73,41 @@ function HomePage() {
     return combined
   }, [pharmacies])
 
-  const filteredSuggestions = useMemo(() => {
-    if (!locationInput.trim()) return []
-    const query = locationInput.toLowerCase()
-    return locationOptions
-      .filter((opt) => opt.toLowerCase().includes(query))
-      .slice(0, 8)
-  }, [locationInput, locationOptions])
+  // Ultra-Fast Photon Suggestion Fetching
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (locationInput.trim().length < 1) { // Immediate response
+        setOsmSuggestions([])
+        return
+      }
+
+      setIsSearchingOsm(true)
+      try {
+        const res = await fetch(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(locationInput)}&limit=6`
+        )
+        const data = await res.json()
+        
+        const formatted = (data.features || []).map((feat) => {
+          const p = feat.properties
+          const parts = []
+          if (p.name) parts.push(p.name)
+          if (p.city || p.town || p.district) parts.push(p.city || p.town || p.district)
+          if (p.state) parts.push(p.state)
+          
+          return parts.length > 0 ? parts.join(', ') : p.name
+        })
+        
+        setOsmSuggestions(Array.from(new Set(formatted)))
+      } catch (err) {
+        console.error('Location Fetch Error:', err)
+      } finally {
+        setIsSearchingOsm(false)
+      }
+    }, 200) // 200ms for "instant" appearance feel
+
+    return () => clearTimeout(timer)
+  }, [locationInput])
 
   const handleLocationChange = (e) => {
     setLocationInput(e.target.value)
@@ -125,25 +161,13 @@ function HomePage() {
   }, [medicines])
 
   const getUnsplashImage = (name) => {
-    // Unsplash pattern requested: https://images.unsplash.com/photo-[ID]?auto=format&fit=crop&q=80&w=300
-    // We use a small stable pool of medical/product photo IDs and pick deterministically per name.
-    const ids = [
-      '1580281657527-47f249e8f6b9',
-      '1582719478185-9b4f31a53426',
-      '1584516150909-866b0a7ed25d',
-      '1612538498451-2b67aabf6c5a',
-      '1603398938378-e54eab446dde',
-      '1583947215259-38e31be8751f',
-      '1595434091145-3c0f00f4d0f9',
-      '1597764699514-0f00066a7f2d',
-      '1584367367094-3f8b3b0fd10a',
-      '1582719478185-9b4f31a53426',
-    ]
+    // Map product names deterministically to the local hi-res stock imagery we downloaded
+    const validIds = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12]
     const s = String(name || '')
     let hash = 0
     for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0
-    const id = ids[hash % ids.length]
-    return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=80&w=300`
+    const id = validIds[hash % validIds.length]
+    return `/medicines/${id}.jpg`
   }
 
   const handleSearch = async (e) => {
@@ -214,9 +238,9 @@ function HomePage() {
             </p>
           </div>
 
-          <form className="form" onSubmit={handleSearch}>
+          <form className="pf-search-form" onSubmit={handleSearch}>
             <div className="form-group">
-              <label htmlFor="location">Delivery location</label>
+              <label htmlFor="location" className="pf-sr-only">Delivery location</label>
               <input
                 id="location"
                 type="text"
@@ -227,14 +251,16 @@ function HomePage() {
                 autoComplete="off"
               />
 
-              {showSuggestions && filteredSuggestions.length > 0 && (
+              {showSuggestions && (osmSuggestions.length > 0 || isSearchingOsm) && (
                 <ul className="suggestions-list">
-                  {filteredSuggestions.map((opt) => (
+                  {isSearchingOsm && <li className="suggestion-item loading">Searching locations...</li>}
+                  {osmSuggestions.map((opt) => (
                     <li
                       key={opt}
                       onMouseDown={() => handleLocationSelect(opt)}
                       className="suggestion-item"
                     >
+                      <span className="suggestion-icon">📍</span>
                       {opt}
                     </li>
                   ))}
@@ -243,7 +269,7 @@ function HomePage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="medicine">Search medicines & products</label>
+              <label htmlFor="medicine" className="pf-sr-only">Search medicines & products</label>
               <input
                 id="medicine"
                 type="text"
@@ -268,6 +294,7 @@ function HomePage() {
           </form>
         </section>
 
+        <div className="pf-divider" />
         <section className="pf-section">
           <div className="pf-section-head">
             <h3 className="pf-section-title">Popular medicines</h3>
@@ -296,6 +323,7 @@ function HomePage() {
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />
+                  <div className="pf-product-meta">Medicine</div>
                   <div className="pf-product-name">{m.name}</div>
                 </button>
               ))}
@@ -303,6 +331,7 @@ function HomePage() {
           )}
         </section>
 
+        <div className="pf-divider" />
         <section className="pf-section">
           <div className="pf-section-head">
             <h3 className="pf-section-title">Healthcare products</h3>
@@ -331,11 +360,36 @@ function HomePage() {
                     loading="lazy"
                     referrerPolicy="no-referrer"
                   />
+                  <div className="pf-product-meta">Healthcare</div>
                   <div className="pf-product-name">{p.name}</div>
                 </button>
               ))}
             </div>
           )}
+        </section>
+
+        <section className="pf-section pf-how-it-works">
+          <div className="pf-section-head pf-center">
+            <h3 className="pf-section-title">Getting started is simple</h3>
+            <p className="pf-section-subtitle">Your wellness journey, streamlined.</p>
+          </div>
+          <div className="pf-feature-grid">
+            <div className="pf-feature-card">
+              <div className="pf-feature-icon">🔍</div>
+              <h4>Search</h4>
+              <p>Find medicines across 500+ local pharmacies in Goa.</p>
+            </div>
+            <div className="pf-feature-card">
+              <div className="pf-feature-icon">🛡️</div>
+              <h4>Reserve</h4>
+              <p>Secure your medication instantly with zero upfront cost.</p>
+            </div>
+            <div className="pf-feature-card">
+              <div className="pf-feature-icon">🚚</div>
+              <h4>Receive</h4>
+              <p>Choose between fast home delivery or convenient pickup.</p>
+            </div>
+          </div>
         </section>
       </div>
     </div>

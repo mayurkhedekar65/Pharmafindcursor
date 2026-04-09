@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 import logo from '../assets/pf-logo.svg'
@@ -16,54 +16,57 @@ function Header() {
   return (
     <header className="app-header">
       <div className="content-wrapper header-inner">
-        <div className="header-content">
-          <Link to="/" className="header-title-link" aria-label="PharmaFind Home">
+        <div className="header-brand">
+          <Link to={isPharmacy ? "/pharmacy/dashboard" : "/"} className="header-title-link" aria-label="PharmaFind Home">
             <div className="pf-brand">
               <img src={logo} alt="" className="pf-logo" />
               <h1 className="app-title">PharmaFind</h1>
             </div>
           </Link>
-          <p className="app-subtitle">Search • Compare • Reserve from local pharmacies in Goa</p>
         </div>
 
         <nav className="header-nav">
-          <Link to="/" className="nav-link">
-            Home
-          </Link>
-
-          <Link to="/cart" className="cart-icon-link">
-            Cart
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </Link>
-
-          {isPharmacy ? (
+          {isAuthenticated && !isPharmacy && (
             <>
-              <Link to="/pharmacy/dashboard" className="nav-link">
-                Dashboard
-              </Link>
-              <Link to="/pharmacy/profile" className="nav-link">
-                Profile
-              </Link>
-              <Link to="/pharmacy/stock" className="nav-link">
-                Manage Stock
-              </Link>
+              <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>Home</NavLink>
+              <NavLink to="/cart" className={({ isActive }) => `nav-link cart-icon-link ${isActive ? 'active' : ''}`}>
+                My Cart
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </NavLink>
+              <NavLink to="/my-orders" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                My Orders
+              </NavLink>
             </>
-          ) : null}
+          )}
+
+          {isPharmacy && (
+            <>
+              <NavLink to="/pharmacy/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Dashboard
+              </NavLink>
+              <NavLink to="/pharmacy/orders" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Orders
+              </NavLink>
+            </>
+          )}
 
           {isAuthenticated ? (
-            <>
-              <span className="nav-user">{user?.username}</span>
-              <button onClick={handleLogout} className="nav-button">
-                Logout
-              </button>
-            </>
+            <div className="nav-profile-group">
+               <div className="pf-user-identity">
+                  <span className="material-symbols-outlined pf-user-icon">person</span>
+                  <span className="nav-user">{user?.username}</span>
+               </div>
+               <button onClick={handleLogout} className="pf-nav-button-secondary">Logout</button>
+            </div>
           ) : (
-            <>
-              <span className="nav-user">Guest</span>
-              <Link to="/login" className="nav-link">
+            <div className="pf-flex pf-align-center pf-gap-md">
+              <Link to="/signup?type=pharmacy" className="nav-link pf-partner-link">
+                Join as Pharmacy
+              </Link>
+              <Link to="/login" className="pf-nav-button">
                 Login
               </Link>
-            </>
+            </div>
           )}
         </nav>
       </div>
